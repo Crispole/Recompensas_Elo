@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Recompensas de Eloísa 🐶✨</title>
+    <!-- Google Fonts: Fredoka & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background sparkles & floating elements -->
+    <div class="background-decorations" id="bgDecorations"></div>
+
+    <!-- MAIN SMARTPHONE CONTAINER -->
+    <div class="phone-container">
+        
+        <!-- HEADER (Simple & Compact) -->
+        <header class="app-header glass-header">
+            <div class="header-logo-container">
+                <img src="puppy.png" alt="Mascota Perrito" class="mascot-img" id="mascotHeader">
+            </div>
+            <div class="header-text">
+                <h1>Eloísa Recompensas</h1>
+                <p id="cloudSyncStatus" class="cloud-status-text">💾 Modo Local (Sin sincronizar)</p>
+            </div>
+        </header>
+
+        <!-- VIEWS WRAPPER -->
+        <div class="views-wrapper">
+            
+            <!-- VIEW 1: DEBERES (TASKS) -->
+            <section id="view-deberes" class="app-view active">
+                <!-- POINTS CARD -->
+                <div class="points-card glass-card text-center">
+                    <div class="card-tag">Estrellas Acumuladas</div>
+                    <div class="points-display">
+                        <span id="totalPoints">0</span>
+                        <span class="points-star">⭐</span>
+                    </div>
+                    
+                    <!-- Mascot Dialogue Bubble -->
+                    <div class="mascot-bubble-container">
+                        <div class="mascot-bubble" id="mascotBubble">¡Hola Eloísa! ¿Qué tarea haremos hoy? 🐶🌸</div>
+                        <img src="puppy.png" alt="Mascota Elo" class="mascot-body-img" id="mascotInteractive">
+                    </div>
+
+                    <!-- Daily Progress Bar -->
+                    <div class="progress-container">
+                        <div class="progress-labels">
+                            <span>Deberes de hoy</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-status" id="progressStatus">¡Vamos que tú puedes! 💪</div>
+                    </div>
+                </div>
+
+                <!-- DAILY TASKS CHECKLIST -->
+                <div class="tasks-section-header">
+                    <h3>Deberes Diarios ☀️</h3>
+                </div>
+                <div class="tasks-list" id="dailyTasksList">
+                    <!-- Tasks loaded dynamically -->
+                </div>
+
+                <!-- AUTO-BONUS CARD -->
+                <div class="bonus-card glass-card" id="bonusCard">
+                    <div class="bonus-content">
+                        <div class="bonus-title">✨ Súper Bonus Diario ✨</div>
+                        <div class="bonus-desc">¡Completa todos tus deberes de hoy para ganar 500 estrellas más!</div>
+                    </div>
+                    <div class="bonus-badge">+500 Pts</div>
+                </div>
+
+                <!-- WEEKLY TASKS CHECKLIST -->
+                <div class="tasks-section-header" style="margin-top: 25px;">
+                    <h3>Deberes Semanales 📅</h3>
+                </div>
+                <div class="tasks-list" id="weeklyTasksList">
+                    <!-- Weekly tasks loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- VIEW 2: PREMIOS (STORE) -->
+            <section id="view-premios" class="app-view">
+                <div class="store-intro glass-card text-center">
+                    <h3>🎁 Cofre de Premios</h3>
+                    <p>¡Canjea tus estrellas por increíbles sorpresas! 🧁</p>
+                </div>
+                <div class="rewards-grid" id="rewardsGrid">
+                    <!-- Rewards loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- VIEW 3: PAPÁS (PARENT PANEL) -->
+            <section id="view-papas" class="app-view">
+                <div class="parent-intro glass-card">
+                    <h3>⚙️ Panel de Padres</h3>
+                    <p>Configura las actividades de Eloísa y gestiona sus puntos.</p>
+                </div>
+
+                <!-- QUICK ACTIONS -->
+                <div class="parent-section glass-card">
+                    <h4>⚠️ Acciones Rápidas</h4>
+                    <div class="quick-actions-grid">
+                        <button class="quick-action-btn penalty-btn" id="respectPenaltyBtn">
+                            <span>Faltar el respeto (-500 ⭐)</span>
+                        </button>
+                        <button class="quick-action-btn reset-btn" id="resetDayBtn">
+                            <span>Iniciar Nuevo Día ☀️</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MANAGE TASKS LIST -->
+                <div class="parent-section glass-card">
+                    <h4>📝 Administrar Actividades (Diarias y Semanales)</h4>
+                    <p class="section-desc">Activa, desactiva o agrega elementos de la lista que Eloísa debe realizar.</p>
+                    
+                    <div class="task-toggles-container" id="parentTaskToggles">
+                        <!-- Toggles loaded dynamically -->
+                    </div>
+
+                    <h5 class="sub-section-title">Añadir Actividad</h5>
+                    <form class="modal-form" id="addTaskForm">
+                        <div class="form-group">
+                            <label for="newTaskName">Nombre de la actividad:</label>
+                            <input type="text" id="newTaskName" placeholder="Ej: Comer toda la comida" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="newTaskPoints">Puntos (+ / -):</label>
+                                <input type="number" id="newTaskPoints" value="100" step="50" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newTaskIcon">Emoji:</label>
+                                <input type="text" id="newTaskIcon" value="✏️" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newTaskFrequency">Frecuencia:</label>
+                            <select id="newTaskFrequency">
+                                <option value="daily">Diaria ☀️</option>
+                                <option value="weekly">Semanal 📅</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="submit-btn">Guardar Actividad</button>
+                    </form>
+                </div>
+
+                <!-- MANAGE REWARDS -->
+                <div class="parent-section glass-card">
+                    <h4>🎁 Administrar Cofre de Premios</h4>
+                    <div class="parent-rewards-list" id="parentRewardsList">
+                        <!-- Rewards list -->
+                    </div>
+
+                    <h5 class="sub-section-title">Añadir Premio</h5>
+                    <form class="modal-form" id="addRewardForm">
+                        <div class="form-group">
+                            <label for="newRewardName">Nombre del Premio:</label>
+                            <input type="text" id="newRewardName" placeholder="Ej: Día de helado" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="newRewardCost">Costo (Estrellas):</label>
+                                <input type="number" id="newRewardCost" value="500" min="10" step="50" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newRewardIcon">Emoji:</label>
+                                <input type="text" id="newRewardIcon" value="🎁" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="submit-btn">Guardar Premio</button>
+                    </form>
+                </div>
+
+                <!-- BALANCE MANUAL ADJUST -->
+                <div class="parent-section glass-card">
+                    <h4>⭐ Ajuste Manual de Estrellas</h4>
+                    <form class="modal-form" id="adjustPointsForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="adjustAmount">Cantidad:</label>
+                                <input type="number" id="adjustAmount" value="100" min="1" step="10" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adjustAction">Operación:</label>
+                                <select id="adjustAction">
+                                    <option value="add">Sumar (+)</option>
+                                    <option value="subtract">Restar (-)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="adjustReason">Motivo:</label>
+                            <input type="text" id="adjustReason" placeholder="Ej: Portarse muy bien" required>
+                        </div>
+                        <button type="submit" class="submit-btn btn-secondary">Aplicar Puntos</button>
+                    </form>
+                </div>
+
+                <!-- CLOUD SYNC (FIREBASE CONFIGURATION) -->
+                <div class="parent-section glass-card">
+                    <h4>☁️ Sincronizar en la Nube (Firebase)</h4>
+                    <p class="section-desc">Vincula la app a Firebase para compartir y sincronizar en tiempo real con tu esposa.</p>
+                    
+                    <form class="modal-form" id="firebaseConfigForm">
+                        <div class="form-group">
+                            <label class="switch-container">
+                                <input type="checkbox" id="firebaseEnable">
+                                <span class="switch-label-text">Activar Sincronización Nube</span>
+                            </label>
+                        </div>
+                        <div id="firebaseCredentialsFields" class="nested-form-fields">
+                            <div class="form-group">
+                                <label for="fbFamilyCode">Código de Familia (Compartido):</label>
+                                <input type="text" id="fbFamilyCode" placeholder="Ej: familia_eloisa" value="familia_eloisa">
+                            </div>
+                            <div class="form-group">
+                                <label for="fbApiKey">API Key:</label>
+                                <input type="password" id="fbApiKey" placeholder="AIzaSy...">
+                            </div>
+                            <div class="form-group">
+                                <label for="fbProjectId">Project ID:</label>
+                                <input type="text" id="fbProjectId" placeholder="mi-proyecto-eloisa">
+                            </div>
+                            <div class="form-group">
+                                <label for="fbAppId">App ID:</label>
+                                <input type="text" id="fbAppId" placeholder="1:1234567:web:abcd...">
+                            </div>
+                            <p class="help-text">Obtén estos datos registrando una app Web en tu consola gratuita de Firebase.</p>
+                        </div>
+                        <button type="submit" class="submit-btn btn-secondary" style="background-color: var(--accent-violet);">Guardar y Conectar</button>
+                    </form>
+                </div>
+
+                <!-- TRANSACTION LOGS -->
+                <div class="parent-section glass-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4>📜 Historial de Actividades</h4>
+                        <button class="clear-history-btn text-xs" id="clearHistoryBtn">Borrar</button>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <!-- Logs load here -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- FIXED BOTTOM NAVIGATION BAR -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-view="view-deberes">
+                <svg viewBox="0 0 24 24" width="24" height="24" class="nav-icon">
+                    <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-2 10H7v-2h10v2m0-4H7V7h10v2m0 8H7v-2h10v2Z"/>
+                </svg>
+                <span>Deberes</span>
+            </button>
+            <button class="nav-item" data-view="view-premios">
+                <svg viewBox="0 0 24 24" width="24" height="24" class="nav-icon">
+                    <path fill="currentColor" d="M22 6H18V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v2H2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6M8 4h8v2H8V4m14 16H2V8h20v12Z"/>
+                </svg>
+                <span>Premios</span>
+            </button>
+            <button class="nav-item" data-view="view-papas" id="navBtnPapas">
+                <svg viewBox="0 0 24 24" width="24" height="24" class="nav-icon">
+                    <path fill="currentColor" d="M12 17a2 2 0 0 0 2-2 2 2 0 0 0-2-2 2 2 0 0 0-2 2 2 2 0 0 0 2 2m6-9h-1V6a5 5 0 0 0-10 0v2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2m-6-6a3 3 0 0 1 3 3v2H9V5a3 3 0 0 1 3-3Z"/>
+                </svg>
+                <span>Papás</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Firebase Compat Library CDNs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <!-- App Main Script -->
+    <script src="app.js"></script>
+</body>
+</html>
