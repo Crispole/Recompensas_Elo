@@ -33,8 +33,16 @@ const defaultRewards = [
 ];
 
 // Firebase settings
-let firebaseEnabled = false;
-let firebaseConfig = null;
+let firebaseEnabled = true;
+let firebaseConfig = {
+    apiKey: "AIzaSyBv0boxdNX8TKuw4_RsmwtPasy3VyNfHdg",
+    authDomain: "recompensas-elo.firebaseapp.com",
+    projectId: "recompensas-elo",
+    storageBucket: "recompensas-elo.firebasestorage.app",
+    messagingSenderId: "260575335561",
+    appId: "1:260575335561:web:a1b09e7c318b8b0846e258",
+    measurementId: "G-ZQ2DVFRSHJ"
+};
 let familyCode = "familia_eloisa";
 let firestoreDb = null;
 let firebaseInitialized = false;
@@ -88,33 +96,15 @@ const fbAppIdInput = document.getElementById('fbAppId');
 // ==========================================
 
 function initData() {
-    // Load Firebase configs first
-    const savedFbEnable = localStorage.getItem('elo_fb_enable') === 'true';
-    const savedFbConfig = localStorage.getItem('elo_fb_config');
-    const savedFamilyCode = localStorage.getItem('elo_family_code');
-    
-    if (savedFamilyCode) {
-        familyCode = savedFamilyCode;
-        fbFamilyCodeInput.value = familyCode;
-    }
-    
-    firebaseEnableCheckbox.checked = savedFbEnable;
-    if (savedFbEnable) {
-        firebaseCredentialsFields.classList.add('active');
-    }
-    
-    if (savedFbConfig) {
-        try {
-            firebaseConfig = JSON.parse(savedFbConfig);
-            fbApiKeyInput.value = firebaseConfig.apiKey || '';
-            fbProjectIdInput.value = firebaseConfig.projectId || '';
-            fbAppIdInput.value = firebaseConfig.appId || '';
-        } catch(e) {
-            console.error("Error parsing stored Firebase config:", e);
-        }
-    }
+    // Pre-fill the parent panel UI fields with the embedded config
+    fbFamilyCodeInput.value = familyCode;
+    fbApiKeyInput.value = firebaseConfig.apiKey;
+    fbProjectIdInput.value = firebaseConfig.projectId;
+    fbAppIdInput.value = firebaseConfig.appId;
+    firebaseEnableCheckbox.checked = true;
+    firebaseCredentialsFields.classList.add('active');
 
-    // Load Local Fallback State
+    // Load Local Fallback State while Firebase connects
     const localData = localStorage.getItem('recompensas_elo_state_v2');
     if (localData) {
         try {
@@ -130,13 +120,8 @@ function initData() {
         resetToDefaults();
     }
 
-    // Attempt Firebase Connection if enabled
-    if (savedFbEnable && firebaseConfig && firebaseConfig.apiKey && firebaseConfig.projectId) {
-        connectFirebase();
-    } else {
-        updateCloudStatusBadge(false, "Modo Local (Sin sincronizar)");
-        syncAndRender();
-    }
+    // Always connect to Firebase automatically
+    connectFirebase();
 }
 
 function resetToDefaults() {
