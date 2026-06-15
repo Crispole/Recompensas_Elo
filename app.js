@@ -24,11 +24,11 @@ const defaultTasks = [
 ];
 
 const defaultRewards = [
-    { id: 'r_piano', name: 'Tiempo de Piano Especial', cost: 150, icon: '🎹' },
-    { id: 'r_peluche', name: 'Peluche Rosado Nuevo', cost: 2000, icon: '🧸' },
+    { id: 'r_tele', name: '20 minutos de televisión', cost: 500, icon: '📺' },
+    { id: 'r_musica_tele', name: 'Poner música en la televisión', cost: 500, icon: '🎵' },
     { id: 'r_pelicula', name: 'Ver una película', cost: 500, icon: '🎬' },
     { id: 'r_parque', name: 'Paseo al parque / plaza', cost: 600, icon: '🛝' },
-    { id: 'r_cena', name: 'Elegir la cena favorita', cost: 400, icon: '🍕' },
+    { id: 'r_stickers', name: 'Stickers de perritos', cost: 400, icon: '🐶' },
     { id: 'r_juegos', name: 'Tarde de juegos con mamá/papá', cost: 800, icon: '🎲' }
 ];
 
@@ -835,16 +835,13 @@ navItems.forEach(item => {
     item.addEventListener('click', () => {
         const targetViewId = item.dataset.view;
         
-        // If switching to parents view, check security question
+        // If switching to parents view, check age security
         if (targetViewId === 'view-papas') {
-            const num1 = Math.floor(Math.random() * 8) + 2;
-            const num2 = Math.floor(Math.random() * 8) + 2;
-            const expected = num1 + num2;
-            const answer = "BYPASS_TEST"; // prompt(`🔒 Código de seguridad para Padres:\n¿Cuánto es ${num1} + ${num2}?`);
-            
-            if (answer === "BYPASS_TEST" || (answer !== null && parseInt(answer.trim(), 10) === expected)) {
-                // Allowed
-            } else {
+            const answer = prompt('🔒 Panel de Papás\n¿Cuántos años tienes?');
+            if (answer === null) return; // cancelled
+            const age = parseInt(answer.trim(), 10);
+            if (age !== 37 && age !== 39) {
+                alert('❌ Edad incorrecta. Acceso denegado.');
                 return; // cancel navigation
             }
         }
