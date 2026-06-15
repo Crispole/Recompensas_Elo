@@ -105,7 +105,7 @@ function initData() {
     firebaseCredentialsFields.classList.add('active');
 
     // Load Local Fallback State while Firebase connects
-    const localData = localStorage.getItem('recompensas_elo_state_v2');
+    const localData = localStorage.getItem('recompensas_elo_state_v3');
     if (localData) {
         try {
             state = JSON.parse(localData);
@@ -140,7 +140,7 @@ function resetToDefaults() {
 // Sincroniza estado a LocalStorage y opcionalmente a Firebase
 function pushStateUpdate() {
     // Save to local fallback always
-    localStorage.setItem('recompensas_elo_state_v2', JSON.stringify(state));
+    localStorage.setItem('recompensas_elo_state_v3', JSON.stringify(state));
     
     // Upload to Firebase if connected
     if (firebaseInitialized && firestoreDb) {
