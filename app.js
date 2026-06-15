@@ -24,12 +24,12 @@ const defaultTasks = [
 ];
 
 const defaultRewards = [
-    { id: 'r_tele', name: '20 minutos de televisión', cost: 500, icon: '📺' },
-    { id: 'r_musica_tele', name: 'Poner música en la televisión', cost: 500, icon: '🎵' },
-    { id: 'r_pelicula', name: 'Ver una película', cost: 500, icon: '🎬' },
-    { id: 'r_parque', name: 'Paseo al parque / plaza', cost: 600, icon: '🛝' },
-    { id: 'r_stickers', name: 'Stickers de perritos', cost: 400, icon: '🐶' },
-    { id: 'r_juegos', name: 'Tarde de juegos con mamá/papá', cost: 800, icon: '🎲' }
+    { id: 'r_tele', name: '20 minutos de televisión', cost: 4000, icon: '📺' },
+    { id: 'r_musica_tele', name: 'Poner música en la televisión', cost: 3000, icon: '🎵' },
+    { id: 'r_pelicula', name: 'Ver una película', cost: 4000, icon: '🎬' },
+    { id: 'r_parque', name: 'Paseo al parque / plaza', cost: 2000, icon: '🛝' },
+    { id: 'r_stickers', name: 'Stickers de perritos', cost: 5000, icon: '🐶' },
+    { id: 'r_juegos', name: 'Tarde de juegos con mamá/papá', cost: 1000, icon: '🎲' }
 ];
 
 // Firebase settings
@@ -141,7 +141,7 @@ function resetToDefaults() {
 function pushStateUpdate() {
     // Save to local fallback always
     localStorage.setItem('recompensas_elo_state_v3', JSON.stringify(state));
-    
+
     // Upload to Firebase if connected
     if (firebaseInitialized && firestoreDb) {
         firestoreDb.collection("families").doc(familyCode).set(state)
@@ -168,21 +168,21 @@ function connectFirebase() {
         }
         firestoreDb = firebase.firestore();
         firebaseInitialized = true;
-        
+
         updateCloudStatusBadge(true, "🟢 Sincronizado en la Nube");
-        
+
         // Listen to updates in real time
         firestoreUnsubscribe = firestoreDb.collection("families").doc(familyCode)
             .onSnapshot(doc => {
                 if (doc.exists) {
                     console.log("Firebase sync: state loaded from cloud");
                     state = doc.data();
-                    
+
                     // Verify if arrays exist
                     if (!state.tasks) state.tasks = [];
                     if (!state.rewards) state.rewards = [];
                     if (!state.history) state.history = [];
-                    
+
                     // Store locally as fallback
                     localStorage.setItem('recompensas_elo_state_v2', JSON.stringify(state));
                     syncAndRender();
@@ -197,7 +197,7 @@ function connectFirebase() {
                 updateCloudStatusBadge(false, "⚠️ Error de permisos/configuración");
                 syncAndRender();
             });
-            
+
     } catch (e) {
         console.error("Firebase Initialization failed:", e);
         updateCloudStatusBadge(false, "⚠️ Error iniciando Firebase");
@@ -233,18 +233,18 @@ function updatePointsDashboard() {
     // Only daily active tasks count for daily progress and Súper Bonus
     const activeDailyTasks = state.tasks.filter(t => t.active && t.frequency === 'daily');
     const completedDailyTasks = activeDailyTasks.filter(t => t.completed);
-    
+
     // Check if daily Súper Bonus is active
     const isBonusActive = activeDailyTasks.length > 0 && activeDailyTasks.every(t => t.completed);
-    
+
     let percentage = 0;
     if (activeDailyTasks.length > 0) {
         percentage = Math.round((completedDailyTasks.length / activeDailyTasks.length) * 100);
     }
-    
+
     progressBarFill.style.width = `${percentage}%`;
     progressPercent.textContent = `${percentage}%`;
-    
+
     if (percentage === 0) {
         progressStatus.textContent = '¡Empieza tus tareas de hoy! 🐾';
     } else if (percentage < 50) {
@@ -285,12 +285,12 @@ function updatePointsDashboard() {
 function renderTasksList() {
     dailyTasksListEl.innerHTML = '';
     weeklyTasksListEl.innerHTML = '';
-    
+
     const activeTasks = state.tasks.filter(t => t.active);
-    
+
     const dailyTasks = activeTasks.filter(t => t.frequency === 'daily');
     const weeklyTasks = activeTasks.filter(t => t.frequency === 'weekly');
-    
+
     // Render Daily
     if (dailyTasks.length === 0) {
         dailyTasksListEl.innerHTML = '<div class="history-empty-message">No hay tareas diarias activas.</div>';
@@ -314,7 +314,7 @@ function renderTasksList() {
 function createTaskDOMElement(task, isWeekly) {
     const item = document.createElement('div');
     item.className = `task-item ${isWeekly ? 'weekly-task-item' : ''} ${task.completed ? 'task-completed' : ''}`;
-    
+
     item.innerHTML = `
         <div class="task-info-side">
             <span class="task-emoji">${task.icon}</span>
@@ -332,12 +332,12 @@ function createTaskDOMElement(task, isWeekly) {
             </div>
         </label>
     `;
-    
+
     const checkbox = item.querySelector('.task-checkbox-input');
     checkbox.addEventListener('change', (e) => {
         toggleTaskCompletion(task.id, e.target.checked);
     });
-    
+
     return item;
 }
 
@@ -346,7 +346,7 @@ function toggleTaskCompletion(id, completed) {
     if (taskIndex !== -1) {
         state.tasks[taskIndex].completed = completed;
         const task = state.tasks[taskIndex];
-        
+
         if (completed) {
             state.totalPoints += task.points;
             addHistory(`✅ Completado: ${task.name} +${task.points} estrellas`, task.points, 'add');
@@ -357,7 +357,7 @@ function toggleTaskCompletion(id, completed) {
             addHistory(`❌ Desmarcado: ${task.name} -${task.points} estrellas`, -task.points, 'sub');
             triggerMascotReaction(`Se desmarcó "${task.name}". Se restaron ${task.points} estrellas.`);
         }
-        
+
         pushStateUpdate();
         syncAndRender();
     }
@@ -366,7 +366,7 @@ function toggleTaskCompletion(id, completed) {
 // Render Rewards Store Grid
 function renderRewardsGrid() {
     rewardsGridEl.innerHTML = '';
-    
+
     if (state.rewards.length === 0) {
         rewardsGridEl.innerHTML = '<div class="history-empty-message">El cofre de premios está vacío.</div>';
         return;
@@ -376,7 +376,7 @@ function renderRewardsGrid() {
         const card = document.createElement('div');
         card.className = 'reward-card';
         const canAfford = state.totalPoints >= reward.cost;
-        
+
         card.innerHTML = `
             <span class="reward-emoji">${reward.icon}</span>
             <span class="reward-title">${reward.name}</span>
@@ -387,12 +387,12 @@ function renderRewardsGrid() {
                 Canjear
             </button>
         `;
-        
+
         const btn = card.querySelector('.reward-buy-btn');
         btn.addEventListener('click', () => {
             redeemReward(reward.id);
         });
-        
+
         rewardsGridEl.appendChild(card);
     });
 }
@@ -417,21 +417,21 @@ function renderHistoryLogs() {
         historyListEl.innerHTML = '<div class="history-empty-message">No hay registros de actividades.</div>';
         return;
     }
-    
+
     const sortedHistory = [...state.history].reverse();
     sortedHistory.forEach(log => {
         const item = document.createElement('div');
         item.className = `history-item history-${log.type}`;
-        
+
         const dateStr = new Date(log.timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date(log.timestamp).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-        
+
         let pointDisplay = '';
         if (log.change > 0) {
             pointDisplay = `+${log.change}⭐`;
         } else if (log.change < 0) {
             pointDisplay = `${log.change}⭐`;
         }
-        
+
         item.innerHTML = `
             <div class="history-item-left">
                 <span class="history-item-desc">${log.description}</span>
@@ -451,7 +451,7 @@ function addHistory(description, change = 0, type = 'info') {
         change: change,
         type: type
     });
-    
+
     if (state.history.length > 100) {
         state.history.shift();
     }
@@ -469,13 +469,13 @@ function renderParentControls() {
 // Tab Tasks: Activate/deactivate/delete pre-configured or custom tasks
 function renderParentTasksToggles() {
     parentTaskToggles.innerHTML = '';
-    
+
     state.tasks.forEach(task => {
         const item = document.createElement('div');
         item.className = 'parent-toggle-item';
-        
+
         const freqText = task.frequency === 'weekly' ? 'Semanal' : 'Diaria';
-        
+
         item.innerHTML = `
             <div class="parent-toggle-left">
                 <span style="font-size: 1.1rem;">${task.icon}</span>
@@ -498,19 +498,19 @@ function renderParentTasksToggles() {
                 ` : ''}
             </div>
         `;
-        
+
         const sliderInput = item.querySelector('.switch-input');
         sliderInput.addEventListener('change', (e) => {
             toggleTaskActive(task.id, e.target.checked);
         });
-        
+
         if (!task.predefined) {
             const delBtn = item.querySelector('.parent-toggle-delete-btn');
             delBtn.addEventListener('click', () => {
                 deleteCustomTask(task.id);
             });
         }
-        
+
         parentTaskToggles.appendChild(item);
     });
 }
@@ -550,11 +550,11 @@ function deleteCustomTask(id) {
 // Render rewards editor
 function renderParentRewardsList() {
     parentRewardsList.innerHTML = '';
-    
+
     state.rewards.forEach(reward => {
         const item = document.createElement('div');
         item.className = 'parent-reward-item';
-        
+
         item.innerHTML = `
             <div class="parent-reward-info">
                 <span style="font-size: 1.1rem;">${reward.icon}</span>
@@ -569,12 +569,12 @@ function renderParentRewardsList() {
                 </svg>
             </button>
         `;
-        
+
         const delBtn = item.querySelector('.parent-toggle-delete-btn');
         delBtn.addEventListener('click', () => {
             deleteReward(reward.id);
         });
-        
+
         parentRewardsList.appendChild(item);
     });
 }
@@ -601,7 +601,7 @@ addTaskForm.addEventListener('submit', (e) => {
     const points = parseInt(document.getElementById('newTaskPoints').value, 10);
     const icon = document.getElementById('newTaskIcon').value.trim();
     const frequency = document.getElementById('newTaskFrequency').value;
-    
+
     if (name && points) {
         const newId = 't_custom_' + Date.now();
         state.tasks.push({
@@ -614,11 +614,11 @@ addTaskForm.addEventListener('submit', (e) => {
             predefined: false,
             frequency: frequency
         });
-        
+
         addHistory(`🔧 Nueva actividad añadida: "${name}" (${frequency === 'weekly' ? 'Semanal' : 'Diaria'}, +${points} pts)`, 0, 'info');
         pushStateUpdate();
         syncAndRender();
-        
+
         addTaskForm.reset();
         document.getElementById('newTaskIcon').value = '✏️'; // default emoji
     }
@@ -630,7 +630,7 @@ addRewardForm.addEventListener('submit', (e) => {
     const name = document.getElementById('newRewardName').value.trim();
     const cost = parseInt(document.getElementById('newRewardCost').value, 10);
     const icon = document.getElementById('newRewardIcon').value.trim();
-    
+
     if (name && cost) {
         const newId = 'r_custom_' + Date.now();
         state.rewards.push({
@@ -639,11 +639,11 @@ addRewardForm.addEventListener('submit', (e) => {
             cost: cost,
             icon: icon || '🎁'
         });
-        
+
         addHistory(`🔧 Nuevo premio añadido: "${name}" (costo: ${cost} estrellas)`, 0, 'info');
         pushStateUpdate();
         syncAndRender();
-        
+
         addRewardForm.reset();
         document.getElementById('newRewardIcon').value = '🎁'; // default emoji
     }
@@ -655,24 +655,24 @@ adjustPointsForm.addEventListener('submit', (e) => {
     const amount = parseInt(document.getElementById('adjustAmount').value, 10);
     const action = document.getElementById('adjustAction').value;
     const reason = document.getElementById('adjustReason').value.trim();
-    
+
     if (amount > 0 && reason) {
         let change = amount;
         if (action === 'subtract') {
             change = -amount;
         }
-        
+
         state.totalPoints += change;
         if (state.totalPoints < 0) state.totalPoints = 0; // prevent negative balance
-        
+
         addHistory(`🔧 Ajuste Manual: ${action === 'add' ? 'Sumadas' : 'Restadas'} ${amount} estrellas (${reason})`, change, action === 'add' ? 'add' : 'sub');
         triggerMascotReaction(`Tus papás ajustaron tus estrellas: ${change > 0 ? '+' : ''}${change}. Motivo: ${reason}`);
         triggerMascotBounce(change > 0 ? 'excited' : 'sad');
         if (change > 0) triggerConfetti();
-        
+
         pushStateUpdate();
         syncAndRender();
-        
+
         adjustPointsForm.reset();
         document.getElementById('adjustAmount').value = '100';
     }
@@ -686,13 +686,13 @@ firebaseConfigForm.addEventListener('submit', (e) => {
     const apiKey = fbApiKeyInput.value.trim();
     const projectId = fbProjectIdInput.value.trim();
     const appId = fbAppIdInput.value.trim();
-    
+
     if (enable) {
         if (!code || !apiKey || !projectId || !appId) {
             alert("❌ Por favor completa todos los campos de credenciales de Firebase.");
             return;
         }
-        
+
         firebaseConfig = {
             apiKey: apiKey,
             authDomain: `${projectId}.firebaseapp.com`,
@@ -702,11 +702,11 @@ firebaseConfigForm.addEventListener('submit', (e) => {
         };
         familyCode = code;
         firebaseEnabled = true;
-        
+
         localStorage.setItem('elo_fb_enable', 'true');
         localStorage.setItem('elo_fb_config', JSON.stringify(firebaseConfig));
         localStorage.setItem('elo_family_code', familyCode);
-        
+
         alert("💾 Configuración de nube guardada. Intentando conectar a Firebase Firestore...");
         connectFirebase();
     } else {
@@ -743,15 +743,15 @@ respectPenaltyBtn.addEventListener('click', () => {
     const num2 = Math.floor(Math.random() * 8) + 2;
     const expected = num1 + num2;
     const answer = "BYPASS_TEST"; // prompt(`⚠️ Confirmar penalización de respeto:\n¿Cuánto es ${num1} + ${num2}?`);
-    
+
     if (answer === "BYPASS_TEST" || (answer !== null && parseInt(answer.trim(), 10) === expected)) {
         state.totalPoints -= 500;
         if (state.totalPoints < 0) state.totalPoints = 0;
-        
+
         addHistory("⚠️ Penalización: Faltar el respeto a los padres -500 estrellas", -500, "sub");
         triggerMascotReaction("¡Oh no! Eloísa, debemos respetar a papá y mamá. ¡Pórtate bien, por favor! 😢🐶");
         triggerMascotBounce('sad');
-        
+
         pushStateUpdate();
         syncAndRender();
     } else if (answer !== null) {
@@ -769,11 +769,11 @@ resetDayBtn.addEventListener('click', () => {
             }
         });
         localStorage.setItem('elo_bonus_active', 'false');
-        
+
         addHistory("☀️ ¡Comenzó un nuevo día! Deberes diarios reiniciados", 0, 'info');
         triggerMascotReaction("¡Buenos días Eloísa! Comencemos un hermoso día de deberes con alegría. 🐾☀️");
         triggerMascotBounce('excited');
-        
+
         pushStateUpdate();
         syncAndRender();
     }
@@ -834,7 +834,7 @@ mascotInteractive.addEventListener('click', () => {
 navItems.forEach(item => {
     item.addEventListener('click', () => {
         const targetViewId = item.dataset.view;
-        
+
         // If switching to parents view, check age security
         if (targetViewId === 'view-papas') {
             const answer = prompt('🔒 Panel de Papás\n¿Cuántos años tienes?');
@@ -845,15 +845,15 @@ navItems.forEach(item => {
                 return; // cancel navigation
             }
         }
-        
+
         // Switch Active Class on nav tabs
         navItems.forEach(i => i.classList.remove('active'));
         item.classList.add('active');
-        
+
         // Switch Active View
         appViews.forEach(v => v.classList.remove('active'));
         document.getElementById(targetViewId).classList.add('active');
-        
+
         // Reset scroll position on view switch
         document.querySelector('.views-wrapper').scrollTop = 0;
     });
@@ -866,7 +866,7 @@ navItems.forEach(item => {
 function initBackgroundDecorations() {
     const bg = document.getElementById('bgDecorations');
     const symbols = ['⭐', '🐾', '🎀', '🌸', '✨', '🐶'];
-    
+
     // Spawn 10 floating ornaments over time
     for (let i = 0; i < 10; i++) {
         setTimeout(() => {
@@ -879,14 +879,14 @@ function initBackgroundDecorations() {
         el.className = Math.random() > 0.5 ? 'floating-note' : 'floating-sparkle';
         el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
         el.style.left = `${Math.random() * 95}vw`;
-        
+
         const size = Math.random() * 1.2 + 0.8;
         el.style.fontSize = `${size}rem`;
         const duration = Math.random() * 8 + 10; // 10s to 18s
         el.style.animationDuration = `${duration}s`;
-        
+
         bg.appendChild(el);
-        
+
         setTimeout(() => {
             el.remove();
             createFloatingItem();
@@ -897,30 +897,30 @@ function initBackgroundDecorations() {
 function triggerConfetti() {
     const colors = ['#ff7eb9', '#a178ff', '#ffd0b5', '#a3e3fc', '#f7d070', '#69f0ae'];
     const particleCount = 35;
-    
+
     for (let i = 0; i < particleCount; i++) {
         const p = document.createElement('div');
         p.className = 'confetti-particle';
         p.style.background = colors[Math.floor(Math.random() * colors.length)];
-        
+
         p.style.left = `${Math.random() * 100}vw`;
         p.style.top = '100vh';
-        
+
         const xDest = (Math.random() - 0.5) * 350;
         const yDest = -(Math.random() * 80 + 30) + 'vh';
         const rotDest = Math.random() * 720 + 'deg';
-        
+
         p.style.setProperty('--x-dest', `${xDest}px`);
         p.style.setProperty('--y-dest', yDest);
         p.style.setProperty('--rot-dest', rotDest);
-        
+
         const size = Math.random() * 6 + 5;
         p.style.width = `${size}px`;
         p.style.height = `${size}px`;
         p.style.animationDelay = `${Math.random() * 0.3}s`;
-        
+
         document.body.appendChild(p);
-        
+
         setTimeout(() => {
             p.remove();
         }, 2500);
