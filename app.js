@@ -32,6 +32,11 @@ const defaultRewards = [
     { id: 'r_juegos', name: 'Tarde de juegos con mamá/papá', cost: 1000, icon: '🎲' }
 ];
 
+// Versión actual del esquema de datos.
+// Incrementar este número cada vez que cambien valores predefinidos (recompensas, tareas, etc.)
+// para que los usuarios existentes reciban la migración automáticamente.
+const CURRENT_SCHEMA_VERSION = 2;
+
 // Firebase settings
 let firebaseEnabled = true;
 let firebaseConfig = {
@@ -112,6 +117,7 @@ function initData() {
             if (!state.tasks || state.tasks.length === 0) state.tasks = [...defaultTasks];
             if (!state.rewards || state.rewards.length === 0) state.rewards = [...defaultRewards];
             if (!state.history) state.history = [];
+            migrateState(); // aplica migraciones si es necesario
         } catch (e) {
             console.error("Error cargando localStorage, restableciendo...", e);
             resetToDefaults();
@@ -128,6 +134,7 @@ function resetToDefaults() {
     state.totalPoints = 0;
     state.tasks = JSON.parse(JSON.stringify(defaultTasks));
     state.rewards = JSON.parse(JSON.stringify(defaultRewards));
+    state.schemaVersion = CURRENT_SCHEMA_VERSION;
     state.history = [{
         id: 'h_init',
         timestamp: new Date().toISOString(),
@@ -135,6 +142,35 @@ function resetToDefaults() {
         change: 0,
         type: 'info'
     }];
+}
+
+// Migra el estado cargado (Firebase o localStorage) a la versión actual del esquema.
+// Añade aquí cada migración numerada para que sea acumulativa y segura.
+function migrateState() {
+    const version = state.schemaVersion || 1;
+    if (version >= CURRENT_SCHEMA_VERSION) return; // ya está actualizado
+
+    console.log(`Migrando datos de schemaVersion ${version} → ${CURRENT_SCHEMA_VERSION}`);
+
+    // ── Migración v1 → v2: actualizar costos de recompensas predefinidas ──
+    if (version < 2) {
+        defaultRewards.forEach(defaultReward => {
+            const existing = state.rewards.find(r => r.id === defaultReward.id);
+            if (existing) {
+                existing.cost = defaultReward.cost; // sobrescribe solo el costo
+            }
+        });
+        state.history.push({
+            id: 'h_migration_v2_' + Date.now(),
+            timestamp: new Date().toISOString(),
+            description: '🔧 Actualización automática: costos de premios actualizados.',
+            change: 0,
+            type: 'info'
+        });
+    }
+
+    state.schemaVersion = CURRENT_SCHEMA_VERSION;
+    // pushStateUpdate() se llama tras esta función en el flujo de carga
 }
 
 // Sincroniza estado a LocalStorage y opcionalmente a Firebase
@@ -183,8 +219,16 @@ function connectFirebase() {
                     if (!state.rewards) state.rewards = [];
                     if (!state.history) state.history = [];
 
+                    // Migrate if needed and push updated state back to Firebase
+                    const needsMigration = (state.schemaVersion || 1) < CURRENT_SCHEMA_VERSION;
+                    migrateState();
+                    if (needsMigration) {
+                        console.log("Firebase sync: pushing migrated state to cloud");
+                        pushStateUpdate();
+                    }
+
                     // Store locally as fallback
-                    localStorage.setItem('recompensas_elo_state_v2', JSON.stringify(state));
+                    localStorage.setItem('recompensas_elo_state_v3', JSON.stringify(state));
                     syncAndRender();
                 } else {
                     // First time connecting, upload current local state to cloud
