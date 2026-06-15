@@ -37,13 +37,14 @@ body {
     font-family: var(--font-ui);
     color: var(--text-dark);
     min-height: 100vh;
+    height: 100%;
     background: linear-gradient(135deg, #ffe5ec, #fff0f5, #e8dbfc, #e3f2fd, #ffe5ec);
     background-size: 400% 400%;
     animation: gradientShift 20s ease infinite;
-    overflow: hidden; /* Hide body scrolling */
+    overflow: hidden;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
 }
 
 /* Background floating decorations */
@@ -89,6 +90,7 @@ body {
     width: 100%;
     max-width: 480px;
     height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
     background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -165,10 +167,13 @@ body {
 
 /* VIEWS SCROLLABLE WRAPPER */
 .views-wrapper {
-    flex-grow: 1;
+    flex: 1 1 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+    overscroll-behavior: contain;
     padding: 16px;
-    padding-bottom: 90px; /* Safe padding for bottom nav */
+    padding-bottom: 100px; /* Safe padding for bottom nav */
+    min-height: 0; /* Critical for flex children to scroll */
 }
 
 /* Glass card styling */
